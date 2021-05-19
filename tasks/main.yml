@@ -1,0 +1,47 @@
+---
+# tasks file for linux_windows_cis
+####################
+####AUDIT_REMEDY####
+####################
+
+####LINUX####
+##AUDIT
+- include: '{{ item }}'
+  vars:
+    params:
+      files:
+        - "audit_{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}.yml"
+  loop: "{{ query('first_found', params, errors='ignore') }}"
+  when: ansible_system == "Linux" 
+
+##REMEDY
+- include: '{{ item }}'
+  become_method: sudo
+  vars:
+    params:
+      files:
+        - "var_{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}.yml"
+        - "remedy_{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}.yml"
+  loop: "{{ query('first_found', params, errors='ignore') }}"
+  when: ansible_system == "Linux"
+
+####WINDOWS####
+##AUDIT
+- include: '{{ item }}'
+  vars:
+    params:
+      files:
+        - "audit_windows{{ ansible_distribution | regex_search('20[0-9]*') }}{{ ansible_distribution | regex_search('R2') }}.yml"
+        - "audit_windows{{ ansible_distribution | regex_search('10') }}.yml"
+  loop: "{{ query('first_found', params, errors='ignore') }}"
+  when: ansible_os_family == "Windows"
+
+##REMEDY
+- include: '{{ item }}'
+  vars:
+    params:
+      files:
+        - "remedy_windows{{ ansible_distribution | regex_search('20[0-9]*') }}{{ ansible_distribution | regex_search('R2') }}.yml"
+        - "remedy_windows{{ ansible_distribution | regex_search('10') }}.yml"
+  loop: "{{ query('first_found', params, errors='ignore') }}"
+  when: ansible_os_family == "Windows"
